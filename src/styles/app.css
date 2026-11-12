@@ -1,0 +1,682 @@
+@import "./tokens.css";
+
+/* ── base ─────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ivory);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── app ──────────────────────────────────────────────────── */
+.app {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* fond : une seule lumière douce derrière le gâteau */
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(233, 166, 181, 0.1), transparent 55%),
+    radial-gradient(90% 60% at 50% 110%, rgba(233, 194, 123, 0.09), transparent 60%),
+    linear-gradient(180deg, #140f1a 0%, #0b0810 58%, #08060b 100%);
+}
+
+/* vignette : referme le cadre sur le gâteau */
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(120% 88% at 50% 45%, transparent 42%, rgba(0, 0, 0, 0.52) 100%);
+}
+
+/* grain de pellicule : texture fine, invisible sur les textes */
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: var(--grain);
+  background-size: 140px 140px;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+
+/* ── scène 3D, plein écran ────────────────────────────────── */
+.stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.stage.is-interactive {
+  pointer-events: auto;
+}
+
+.cake-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.cake-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.is-interactive .cake-canvas {
+  cursor: grab;
+}
+
+.is-grabbing .cake-canvas {
+  cursor: grabbing;
+}
+
+.cake-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 120px;
+}
+
+/* voile de bas d'écran : le bouton respire sur le fond */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 62%,
+    rgba(8, 6, 11, 0.45) 86%,
+    rgba(8, 6, 11, 0.9) 100%
+  );
+}
+
+/* ── interface ────────────────────────────────────────────── */
+.ui {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: max(var(--pad-y), env(safe-area-inset-top)) var(--pad-x)
+    max(var(--pad-y), env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+/* filet de progression, collé au bord haut */
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+}
+
+.progress {
+  position: absolute;
+  inset: 0;
+  background: var(--line);
+}
+
+.progress .fill {
+  display: block;
+  height: 100%;
+  background: var(--rose);
+  box-shadow: 0 0 12px rgba(233, 166, 181, 0.4);
+  transition: width 0.7s var(--ease);
+}
+
+.content {
+  position: relative;
+  min-height: 0;
+}
+
+/* ── diapositives ─────────────────────────────────────────── */
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 26px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+  margin: 0 0 16px;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kicker::before,
+.kicker::after {
+  content: "";
+  width: 26px;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(4rem, 24vw, 9.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.name .ch {
+  background-image: linear-gradient(180deg, #fdf8f3 0%, #f3ded6 52%, #e9a6b5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  margin: 24px 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+}
+
+.hint-icon {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+}
+
+/* ── le message ───────────────────────────────────────────── */
+.headline {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.92;
+}
+
+.headline .eyebrow {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 0.95em;
+}
+
+.headline .lead {
+  display: block;
+  font-size: clamp(2.4rem, 12vw, 4.4rem);
+  letter-spacing: -0.02em;
+  color: var(--ivory);
+}
+
+.headline .accent {
+  display: block;
+  font-style: italic;
+  font-size: clamp(2.6rem, 13.5vw, 5rem);
+  letter-spacing: -0.025em;
+  color: var(--rose);
+  margin-top: 0.04em;
+}
+
+.headline .lead .ch {
+  color: var(--ivory);
+}
+
+.headline .accent .ch {
+  color: var(--rose);
+}
+
+.line {
+  display: block;
+}
+
+.word {
+  display: inline-block;
+  white-space: nowrap;
+  margin-right: 0.22em;
+}
+
+.ch {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.hearts {
+  --heart-size: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--heart-size) * 0.34);
+  margin-top: 0.9em;
+  filter: drop-shadow(0 0 14px rgba(233, 166, 181, 0.35));
+}
+
+.hearts .heart {
+  display: inline-block;
+  width: var(--heart-size);
+  height: calc(var(--heart-size) * 0.88);
+}
+
+.hearts svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── vœu ──────────────────────────────────────────────────── */
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 11vw, 3.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  color: var(--ivory);
+}
+
+.title.done {
+  color: var(--rose);
+  text-shadow: 0 0 46px rgba(233, 166, 181, 0.3);
+}
+
+.signature {
+  margin: 20px 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.wish {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* ── photos ───────────────────────────────────────────────── */
+.strip {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+  margin-top: 34px;
+  padding-bottom: 8px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.strip::-webkit-scrollbar {
+  display: none;
+}
+
+.strip img {
+  flex: 0 0 auto;
+  width: 58vw;
+  max-width: 280px;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 14px;
+  scroll-snap-align: center;
+  box-shadow: 0 30px 70px -34px rgba(0, 0, 0, 0.95);
+}
+
+/* ── pied ─────────────────────────────────────────────────── */
+.dock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 10px;
+  pointer-events: none;
+}
+
+.cta {
+  pointer-events: auto;
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  height: 54px;
+  padding: 0 30px;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a1014;
+  background: linear-gradient(180deg, #f2d191 0%, var(--gold) 62%, #dfb168 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 16px 34px -18px rgba(233, 194, 123, 0.65);
+  transition: transform 0.25s var(--ease), box-shadow 0.3s var(--ease);
+  touch-action: manipulation;
+}
+
+.cta:active {
+  transform: scale(0.97);
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--ivory);
+  outline-offset: 4px;
+}
+
+@media (hover: hover) {
+  .cta:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 22px 40px -18px rgba(233, 194, 123, 0.7);
+  }
+}
+
+/* ── flash au souffle ─────────────────────────────────────── */
+.app.is-flashing::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 58%,
+    rgba(255, 226, 170, 0.55),
+    rgba(255, 190, 120, 0.12) 42%,
+    transparent 66%
+  );
+  animation: flash 0.34s ease-out forwards;
+}
+
+@keyframes flash {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ── confettis ────────────────────────────────────────────── */
+.confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── grands écrans ────────────────────────────────────────── */
+@media (min-width: 760px) {
+  .ui {
+    padding: max(26px, env(safe-area-inset-top)) 34px max(24px, env(safe-area-inset-bottom));
+  }
+
+  .slide {
+    padding-top: 34px;
+  }
+
+  .kicker {
+    margin-bottom: 20px;
+    font-size: 0.66rem;
+  }
+
+  .name {
+    font-size: clamp(5rem, 13vw, 11rem);
+  }
+
+  .hint {
+    margin-top: 28px;
+    font-size: 1.06rem;
+  }
+
+  .headline .lead {
+    font-size: clamp(2.8rem, 7.4vw, 5.2rem);
+  }
+
+  .headline .accent {
+    font-size: clamp(3rem, 8.2vw, 5.8rem);
+  }
+
+  .headline .eyebrow {
+    font-size: 0.7rem;
+  }
+
+  .strip img {
+    width: 280px;
+  }
+
+  .cta {
+    height: 56px;
+    padding: 0 34px;
+    font-size: 0.8rem;
+  }
+}
+
+/* ── grand écran : deux colonnes ────────────────────────────
+   Le texte tient la colonne de gauche, le gâteau la droite.
+   Le seuil (900 px, paysage) doit rester aligné sur WIDE_MIN
+   dans src/content.js. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .ui {
+    grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    padding: 0 clamp(40px, 7vw, 130px) clamp(30px, 6vh, 64px);
+  }
+
+  .content {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .dock {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: flex-start;
+    padding-top: 0;
+  }
+
+  .slide {
+    align-items: flex-start;
+    justify-content: center;
+    text-align: left;
+    padding-top: 0;
+  }
+
+  .kicker {
+    margin-bottom: 22px;
+    font-size: 0.64rem;
+  }
+
+  .kicker::before {
+    display: none;
+  }
+
+  .name {
+    font-size: clamp(4.5rem, 15vw, 15rem);
+    line-height: 0.86;
+  }
+
+  .hint {
+    margin-top: 26px;
+    font-size: 1.02rem;
+  }
+
+  .headline {
+    align-items: flex-start;
+  }
+
+  .headline .eyebrow {
+    font-size: 0.66rem;
+    margin-bottom: 0.8em;
+  }
+
+  .headline .lead {
+    font-size: clamp(2.2rem, 5.6vw, 4.8rem);
+  }
+
+  .headline .accent {
+    font-size: clamp(2.4rem, 6.2vw, 5.4rem);
+  }
+
+  .hearts {
+    --heart-size: 30px;
+    margin-top: 0.9em;
+  }
+
+  .title {
+    font-size: clamp(2.6rem, 5vw, 4.4rem);
+  }
+
+  .signature {
+    margin-top: 18px;
+  }
+
+  .strip {
+    justify-content: flex-start;
+    margin-top: 28px;
+  }
+
+  .strip img {
+    width: 26vw;
+    max-width: 260px;
+  }
+
+  .cta {
+    height: 56px;
+  }
+
+  /* la lumière reste derrière le gâteau, à droite */
+  .bg {
+    background:
+      radial-gradient(62% 62% at 72% 42%, rgba(233, 166, 181, 0.11), transparent 62%),
+      radial-gradient(80% 55% at 76% 108%, rgba(233, 194, 123, 0.1), transparent 62%),
+      linear-gradient(180deg, #140f1a 0%, #0b0810 58%, #08060b 100%);
+  }
+
+  .vignette {
+    background: radial-gradient(95% 92% at 70% 46%, transparent 40%, rgba(0, 0, 0, 0.56) 100%);
+  }
+
+  .scrim {
+    background: linear-gradient(
+      100deg,
+      rgba(8, 6, 11, 0.62) 0%,
+      rgba(8, 6, 11, 0.2) 34%,
+      transparent 62%
+    );
+  }
+}
+
+/* ── téléphone en paysage : bandeau bas ───────────────────── */
+@media (max-height: 560px) and (orientation: landscape) and (max-width: 899px) {
+  .slide {
+    padding-top: 8px;
+  }
+
+  .name {
+    font-size: clamp(2.8rem, 9vw, 4.2rem);
+  }
+
+  .headline .lead {
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+  }
+
+  .headline .accent {
+    font-size: clamp(2rem, 5.4vw, 3rem);
+  }
+
+  .kicker {
+    margin-bottom: 8px;
+  }
+
+  .hint {
+    margin-top: 12px;
+    font-size: 0.86rem;
+  }
+
+  .cta {
+    height: 46px;
+  }
+
+  .strip {
+    margin-top: 18px;
+  }
+}
+
+/* ── accessibilité ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .progress .fill,
+  .cta {
+    transition: none;
+  }
+
+  .grain {
+    opacity: 0.03;
+  }
+}

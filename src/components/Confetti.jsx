@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-const COLORS = ["#F2C260", "#E7A2B4", "#FFF7EC", "#C97C92"];
+const COLORS = ["#e9c27b", "#e9a6b5", "#f7efe9", "#c97c92"];
 
 function heartPath(ctx, s) {
   ctx.beginPath();
@@ -64,8 +64,7 @@ export default function Confetti({ onDone }) {
     if (reduce) {
       burst(w / 2, h * 0.55, 26, 0.9, 260);
     } else {
-      burst(w / 2, h * 0.66, Math.min(150, Math.round(w / 4)),
-        Math.PI * 0.42, Math.max(520, h * 0.95));
+      burst(w / 2, h * 0.66, Math.min(150, Math.round(w / 4)), Math.PI * 0.42, Math.max(520, h * 0.95));
       setTimeout(() => burst(w * 0.18, h * 0.5, 45, 0.9, 620), 220);
       setTimeout(() => burst(w * 0.82, h * 0.5, 45, 0.9, 620), 380);
     }
