@@ -1,3 +1,8 @@
+import pic1 from "../pics/1.jpeg";
+import pic2 from "../pics/2.jpeg";
+import pic3 from "../pics/3.jpeg";
+import pic4 from "../pics/4.jpeg";
+
 /* ══════════════════════════════════════════════════════════
    Source unique : textes, réglages et photos du site.
    Aucun autre fichier ne contient de contenu éditorial.
@@ -31,6 +36,7 @@ export const COPY = {
   },
   photos: {
     title: "Nous.",
+    subtitle: "Quelques moments passés ensemble, en attendant tous les prochains.",
   },
   nav: {
     hero: "Gâteau",
@@ -42,10 +48,8 @@ export const COPY = {
   next: "Continuer",
 };
 
-/* Dépose des photos dans public/photos/ puis liste-les ici :
-   ["/photos/01.jpg", "/photos/02.jpg"].
-   Tant que la liste est vide, la page « Nous » n'existe pas. */
-export const PHOTOS = [];
+/* Photos importées depuis pics/ à la racine du dépôt. */
+export const PHOTOS = [pic1, pic2, pic3, pic4];
 
 /* Cadrage de la caméra 3D, page par page.
    top   hauteur du sommet du gâteau, en fraction de l'écran
@@ -58,7 +62,7 @@ export const FRAMES = {
   hero: { top: 0.35, size: 0.34, pitch: 0.28, spin: 0.14, expo: 0.85 },
   message: { top: 0.41, size: 0.32, pitch: 0.4, spin: 0.05, expo: 0.78 },
   wish: { top: 0.32, size: 0.34, pitch: 0.22, spin: 0.09, expo: 0.88 },
-  photos: { top: 0.58, size: 0.24, pitch: 0.42, spin: 0.04, expo: 0.76 },
+  photos: { top: 0.65, size: 0.21, pitch: 0.42, spin: 0.04, expo: 0.76 },
 };
 
 /* Grand écran : deux colonnes. Le texte tient la gauche, le
@@ -68,7 +72,7 @@ export const FRAMES_WIDE = {
   hero: { top: 0.2, size: 0.6, pitch: 0.3, spin: 0.14, expo: 0.86, x: 0.2 },
   message: { top: 0.24, size: 0.54, pitch: 0.42, spin: 0.05, expo: 0.8, x: 0.2 },
   wish: { top: 0.2, size: 0.54, pitch: 0.26, spin: 0.09, expo: 0.9, x: 0.2 },
-  photos: { top: 0.16, size: 0.6, pitch: 0.44, spin: 0.04, expo: 0.78, x: 0.2 },
+  photos: { top: 0.18, size: 0.58, pitch: 0.42, spin: 0.04, expo: 0.8, x: 0.2 },
 };
 
 /* À partir de cette largeur, on passe en deux colonnes. */

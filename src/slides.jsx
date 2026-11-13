@@ -91,6 +91,7 @@ export function Photos({ photos }) {
   return (
     <Slide>
       <h1 className="title">{COPY.photos.title}</h1>
+      <p className="subtitle">{COPY.photos.subtitle}</p>
       <PhotoStrip photos={photos} />
     </Slide>
   );

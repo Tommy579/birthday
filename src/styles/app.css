@@ -141,72 +141,34 @@ body {
   flex: 0 0 auto;
 }
 
-.steps {
-  pointer-events: auto;
+.progress-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px;
+  gap: 10px;
+}
+
+.progress {
+  width: 84px;
+  height: 4px;
   border-radius: 999px;
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--line);
 }
 
-.step {
-  appearance: none;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-block-size: 32px;
-  padding: 0 11px;
+.progress .fill {
+  display: block;
+  height: 100%;
   border-radius: 999px;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1;
-  touch-action: manipulation;
-  transition: background-color 0.22s var(--ease), color 0.22s var(--ease),
-    border-color 0.22s var(--ease);
-}
-
-.step-num {
-  display: inline-grid;
-  place-items: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  background: rgba(184, 75, 112, 0.14);
-  color: var(--rose);
-}
-
-.step.is-done {
-  color: var(--ink);
-}
-
-.step.is-active {
-  background: var(--bg);
-  color: var(--ink);
-  font-weight: 600;
-  border-color: var(--line-strong);
-  box-shadow: 0 2px 8px -4px rgba(36, 17, 24, 0.18);
-}
-
-.step.is-active .step-num {
   background: var(--rose);
-  color: var(--bg);
+  transition: width 0.55s var(--ease);
 }
 
-@media (hover: hover) {
-  .step:hover:not(.is-active) {
-    color: var(--ink);
-    background: rgba(255, 255, 255, 0.55);
-  }
+.progress-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
 }
 
 .content {
@@ -399,18 +361,23 @@ body {
 }
 
 /* ── photos ───────────────────────────────────────────────── */
+.strip-shell {
+  width: 100%;
+  margin-top: 18px;
+  pointer-events: auto;
+}
+
 .strip {
   display: flex;
-  gap: 14px;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  margin-top: 26px;
-  padding-bottom: 10px;
+  padding: 4px 2px 12px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  pointer-events: auto;
 }
 
 .strip::-webkit-scrollbar {
@@ -419,15 +386,43 @@ body {
 
 .strip img {
   flex: 0 0 auto;
-  width: 58vw;
-  max-width: 280px;
-  aspect-ratio: 3 / 4;
+  height: clamp(185px, 28dvh, 240px);
+  width: auto;
+  max-width: 82vw;
   object-fit: cover;
   border-radius: 16px;
   border: 1px solid var(--line);
   background: var(--surface);
   scroll-snap-align: center;
-  box-shadow: 0 18px 38px -24px rgba(36, 17, 24, 0.24);
+  box-shadow: 0 14px 30px -20px rgba(36, 17, 24, 0.24);
+}
+
+.strip-nav {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.strip-btn {
+  appearance: none;
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+@media (hover: hover) {
+  .strip-btn:hover {
+    background: var(--rose-soft);
+    border-color: var(--rose);
+  }
 }
 
 /* ── pied et actions ──────────────────────────────────────── */
@@ -531,28 +526,8 @@ body {
   pointer-events: none;
 }
 
-/* ── écran étroit (375 px) ────────────────────────────────── */
-@media (max-width: 400px) {
-  .step-label {
-    font-size: 0.72rem;
-  }
-
-  .step {
-    padding: 0 9px;
-    gap: 5px;
-  }
-
-  .step-num {
-    display: none;
-  }
-}
-
 /* ── pointeurs tactiles ───────────────────────────────────── */
 @media (pointer: coarse) {
-  .step {
-    min-block-size: 38px;
-  }
-
   .btn-secondary,
   .cta {
     min-block-size: 52px;
@@ -592,7 +567,7 @@ body {
   }
 
   .strip img {
-    width: 280px;
+    height: clamp(210px, 30dvh, 260px);
   }
 }
 
@@ -680,14 +655,22 @@ body {
     margin-top: 18px;
   }
 
+  .strip-shell {
+    margin-top: 22px;
+  }
+
   .strip {
     justify-content: flex-start;
-    margin-top: 28px;
   }
 
   .strip img {
-    width: 26vw;
-    max-width: 260px;
+    height: clamp(210px, 32vh, 270px);
+    max-width: 100%;
+    scroll-snap-align: start;
+  }
+
+  .strip-nav {
+    display: flex;
   }
 
   .bg {
@@ -738,10 +721,10 @@ body {
 
 /* ── mode contraste élevé (Windows High Contrast) ─────────── */
 @media (forced-colors: active) {
-  .steps,
-  .step.is-active,
+  .progress,
   .kicker,
   .hint,
+  .strip-btn,
   .btn-secondary,
   .cta {
     border: 1px solid ButtonText;
@@ -749,7 +732,7 @@ body {
     color: ButtonText;
   }
 
-  .step.is-active,
+  .progress .fill,
   .cta {
     background: Highlight;
     color: HighlightText;
@@ -763,8 +746,9 @@ body {
 
 /* ── accessibilité mouvement réduit ───────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .step,
+  .progress .fill,
   .hint,
+  .strip-btn,
   .btn-secondary,
   .cta {
     transition: none;

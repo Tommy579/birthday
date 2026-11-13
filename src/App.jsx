@@ -108,7 +108,7 @@ export default function App() {
       <div className="ui">
         <header className="topbar">
           <span className="brand">{BIRTHDAY.name}</span>
-          <Progress slides={SLIDES} index={index} onSelect={setIndex} />
+          <Progress index={index} total={SLIDES.length} />
         </header>
 
         <div className="content">
