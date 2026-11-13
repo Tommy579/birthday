@@ -10,7 +10,7 @@ const C = {
   berry: 0xc9185b,
   candle: 0xdd5885,
   plate: 0xfbeaf0,
-  roseGold: 0xc96b89,
+  roseTrim: 0xc96b89,
   heart: 0xc9185b,
 };
 
@@ -146,8 +146,8 @@ export function buildCake() {
     roughness: 0.42,
     envMapIntensity: 0.38,
   });
-  const matRoseGold = new THREE.MeshStandardMaterial({
-    color: C.roseGold,
+  const matRoseTrim = new THREE.MeshStandardMaterial({
+    color: C.roseTrim,
     metalness: 0.78,
     roughness: 0.26,
     envMapIntensity: 0.95,
@@ -167,14 +167,14 @@ export function buildCake() {
 
   const SPRINKLE_COLORS = [C.icingWhite, C.candle, C.berry, C.creamRose];
 
-  /* plateau porcelaine + liseré rose doré */
+  /* plateau porcelaine + liseré rose */
   const plate = new THREE.Mesh(
     new THREE.CylinderGeometry(1.78, 1.64, 0.1, 96),
     matPlate
   );
   plate.position.y = 0.05;
   group.add(plate);
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(1.76, 0.022, 10, 96), matRoseGold);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(1.76, 0.022, 10, 96), matRoseTrim);
   rim.rotation.x = Math.PI / 2;
   rim.position.y = 0.1;
   group.add(rim);
@@ -365,8 +365,8 @@ export function buildCake() {
     }
   });
 
-  /* cœur rose sur tige rose dorée */
-  const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.46, 8), matRoseGold);
+  /* cœur rose sur tige rose */
+  const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.46, 8), matRoseTrim);
   stick.position.y = TOP + 0.23;
   group.add(stick);
 
