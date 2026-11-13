@@ -1,7 +1,11 @@
-import pic1 from "../pics/1.jpeg";
-import pic2 from "../pics/2.jpeg";
-import pic3 from "../pics/3.jpeg";
-import pic4 from "../pics/4.jpeg";
+const picModules = import.meta.glob(
+  "../pics/*.{jpg,jpeg,png,webp,avif,JPG,JPEG,PNG,WEBP}",
+  { eager: true, import: "default" }
+);
+
+const PICS = Object.entries(picModules)
+  .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
+  .map(([, src]) => src);
 
 /* ══════════════════════════════════════════════════════════
    Source unique : textes, réglages et photos du site.
@@ -36,7 +40,7 @@ export const COPY = {
   },
   photos: {
     title: "Nous.",
-    subtitle: "Quelques moments passés ensemble, en attendant tous les prochains.",
+    subtitle: "Quelques moments passés ensemble, en attendant tous les prochains 🥰",
   },
   nav: {
     hero: "Gâteau",
@@ -49,7 +53,7 @@ export const COPY = {
 };
 
 /* Photos importées depuis pics/ à la racine du dépôt. */
-export const PHOTOS = [pic1, pic2, pic3, pic4];
+export const PHOTOS = PICS;
 
 /* Cadrage de la caméra 3D, page par page.
    top   hauteur du sommet du gâteau, en fraction de l'écran
