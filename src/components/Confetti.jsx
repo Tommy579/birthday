@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-const COLORS = ["#e9c27b", "#e9a6b5", "#f7efe9", "#c97c92"];
+const COLORS = ["#c9185b", "#df5f89", "#f2a6be", "#b84b70"];
 
 function heartPath(ctx, s) {
   ctx.beginPath();

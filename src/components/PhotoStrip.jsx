@@ -1,9 +1,5 @@
 /* Bande de photos, défilement horizontal au doigt.
-   Ne s'affiche que si la liste n'est pas vide.
-
-   Les chemins de content.js s'écrivent « /photos/01.jpg ».
-   On ajoute le préfixe du site (import.meta.env.BASE_URL) pour
-   qu'ils restent valides sur GitHub Pages comme en local. */
+   Ne s'affiche que si la liste n'est pas vide. */
 const BASE = import.meta.env.BASE_URL || "/";
 
 function resolve(src) {
@@ -22,7 +18,7 @@ export default function PhotoStrip({ photos }) {
         <img
           key={src}
           src={resolve(src)}
-          alt=""
+          alt={`Souvenir ${i + 1}`}
           loading={i < 2 ? "eager" : "lazy"}
           role="listitem"
         />

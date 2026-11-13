@@ -1,38 +1,34 @@
 /* ══════════════════════════════════════════════════════════
-   Design tokens — source unique de la direction artistique.
+   Design tokens : palette blanc et rose (2 calmes + 1 forte).
 
-   Palette : nuit prune, ivoire chaud, un seul accent rose.
-   L'or est réservé au bouton et à la lumière des bougies.
+     fond (calme 1, 60%)      #ffffff  blanc studio
+     surface (calme 2, 30%)   #fdf2f6  rose porcelaine
+     encre (texte)            #241118  prune profond
+     structure (calme rose)   #b84b70  rose soutenu lisible
+     accent (forte, < 10%)    #c9185b  framboise, action unique
 
-     fond      #0b0810  nuit prune presque noire
-     surface   #130e1a  prune chaud
-     ivoire    #f7efe9  texte
-     rose      #e9a6b5  accent unique
-     or        #e9c27b  action + bougies
-
-   Typographie : une serif éditoriale (Instrument Serif) pour
-   les titres, une sans neutre (Manrope) pour l'interface.
+   Typographie : Instrument Serif pour les titres éditoriaux,
+   Plus Jakarta Sans pour l'interface et la lecture mobile.
    ══════════════════════════════════════════════════════════ */
 :root {
-  --bg: #0b0810;
-  --bg-2: #130e1a;
-  --surface: #17111f;
-  --ivory: #f7efe9;
-  --rose: #e9a6b5;
-  --rose-deep: #cf7f96;
-  --gold: #e9c27b;
-  --muted: #a99aa6;
-  --line: rgba(247, 239, 233, 0.11);
-  --line-strong: rgba(247, 239, 233, 0.24);
+  color-scheme: light;
+
+  --bg: #ffffff;
+  --surface: #fdf2f6;
+  --ink: #241118;
+  --muted: #6d535e;
+  --rose: #b84b70;
+  --rose-soft: #f6dce6;
+  --accent: #c9185b;
+  --accent-hover: #b1134f;
+  --line: rgba(184, 75, 112, 0.18);
+  --line-strong: rgba(184, 75, 112, 0.36);
 
   --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
-  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --pad-x: 22px;
-  --pad-y: 18px;
+  --pad-x: 20px;
+  --pad-y: 16px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-
-  /* grain de pellicule, en data-URI pour éviter une requête */
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
 }

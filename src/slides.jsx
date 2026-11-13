@@ -7,9 +7,9 @@ import { BIRTHDAY, COPY } from "./content.js";
 const EASE = [0.16, 1, 0.3, 1];
 
 const variants = {
-  enter: { opacity: 0, y: 24 },
+  enter: { opacity: 0, y: 18 },
   center: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -18 },
+  exit: { opacity: 0, y: -14 },
 };
 
 /* Une page : fondu + glissement, instantané si l'utilisateur
@@ -23,14 +23,14 @@ function Slide({ children }) {
       initial={reduce ? false : "enter"}
       animate="center"
       exit="exit"
-      transition={reduce ? { duration: 0 } : { duration: 0.55, ease: EASE }}
+      transition={reduce ? { duration: 0 } : { duration: 0.48, ease: EASE }}
     >
       {children}
     </motion.section>
   );
 }
 
-/* Petit pictogramme de rotation, dessiné plutôt qu'un caractère. */
+/* Petit pictogramme de rotation, dessiné en SVG. */
 function TurnIcon() {
   return (
     <svg className="hint-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -38,14 +38,14 @@ function TurnIcon() {
         d="M20.5 12a8.5 8.5 0 1 1-2.5-6"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth="1.6"
         strokeLinecap="round"
       />
       <path
         d="M20.5 3.5V9H15"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth="1.6"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -53,16 +53,16 @@ function TurnIcon() {
   );
 }
 
-export function Hero() {
+export function Hero({ interacted }) {
   return (
     <Slide>
       <p className="kicker">{COPY.hero.kicker}</p>
       <h1 className="name">
-        <Reveal text={COPY.hero.title} delay={0.12} />
+        <Reveal text={COPY.hero.title} delay={0.08} />
       </h1>
-      <p className="hint">
+      <p className={`hint ${interacted ? "is-quiet" : ""}`}>
         <TurnIcon />
-        {COPY.hero.hint}
+        <span>{COPY.hero.hint}</span>
       </p>
     </Slide>
   );
@@ -71,18 +71,18 @@ export function Hero() {
 export function Message() {
   return (
     <Slide>
-      <h2 className="headline">
+      <h1 className="headline">
         <span className="eyebrow">
           <Reveal text={COPY.message.eyebrow} delay={0.04} />
         </span>
         <span className="lead">
-          <Reveal text={COPY.message.lead} delay={0.16} />
+          <Reveal text={COPY.message.lead} delay={0.14} />
         </span>
         <span className="accent">
-          <Reveal text={COPY.message.accent} delay={0.32} />
+          <Reveal text={COPY.message.accent} delay={0.28} />
         </span>
         <Hearts count={BIRTHDAY.hearts} />
-      </h2>
+      </h1>
     </Slide>
   );
 }
@@ -90,7 +90,7 @@ export function Message() {
 export function Photos({ photos }) {
   return (
     <Slide>
-      <h2 className="title">{COPY.photos.title}</h2>
+      <h1 className="title">{COPY.photos.title}</h1>
       <PhotoStrip photos={photos} />
     </Slide>
   );
@@ -98,7 +98,7 @@ export function Photos({ photos }) {
 
 export function Wish({ blown }) {
   const reduce = useReducedMotion();
-  const t = reduce ? { duration: 0 } : { duration: 0.6, ease: EASE };
+  const t = reduce ? { duration: 0 } : { duration: 0.5, ease: EASE };
 
   return (
     <Slide>
@@ -107,23 +107,24 @@ export function Wish({ blown }) {
           <motion.div
             key="wish"
             className="wish"
-            initial={reduce ? false : { opacity: 0, y: 14 }}
+            initial={reduce ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={t}
           >
-            <h2 className="title">{COPY.wish.title}</h2>
+            <h1 className="title">{COPY.wish.title}</h1>
+            <p className="subtitle">{COPY.wish.subtitle}</p>
           </motion.div>
         ) : (
           <motion.div
             key="done"
             className="wish"
-            initial={reduce ? false : { opacity: 0, y: 14 }}
+            initial={reduce ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={t}
           >
-            <h2 className="title done">{COPY.wish.done}</h2>
-            <p className="signature">— {BIRTHDAY.signature}</p>
+            <h1 className="title done">{COPY.wish.done}</h1>
+            <p className="signature">{BIRTHDAY.signature}</p>
           </motion.div>
         )}
       </AnimatePresence>

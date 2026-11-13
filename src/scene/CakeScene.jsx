@@ -11,16 +11,18 @@ const FOV = 30;
    La caméra change de cadrage à chaque page (fondu doux),
    le gâteau tourne, et les 18 bougies s'éteignent au souffle.
    ────────────────────────────────────────────────────────── */
-export default function CakeScene({ frame = "hero", interactive = false, blown = false }) {
+export default function CakeScene({ frame = "hero", interactive = false, blown = false, onInteract }) {
   const hostRef = useRef(null);
   const frameRef = useRef(frame);
   const interactiveRef = useRef(interactive);
   const blownRef = useRef(blown);
+  const onInteractRef = useRef(onInteract);
   const [failed, setFailed] = useState(false);
 
   frameRef.current = frame;
   interactiveRef.current = interactive;
   blownRef.current = blown;
+  onInteractRef.current = onInteract;
 
   useEffect(() => {
     const host = hostRef.current;
@@ -74,15 +76,15 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
     scene.environment = envRT.texture;
     pmrem.dispose();
 
-    const hemi = new THREE.HemisphereLight(0xffdbc4, 0x1a0b12, 0.55);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xf2ccd8, 0.82);
     scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xfff2e4, 1.9);
+    const key = new THREE.DirectionalLight(0xfffaf6, 1.5);
     key.position.set(4.5, 7, 5.5);
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0xff5c8a, 2.4);
+    const rim = new THREE.DirectionalLight(0xea84a7, 1.15);
     rim.position.set(-5, 3.5, -4.5);
     scene.add(rim);
-    const fill = new THREE.PointLight(0xffbb92, 10, 14, 2);
+    const fill = new THREE.PointLight(0xffe5ee, 4, 14, 2);
     fill.position.set(-2.4, 1.4, 4.2);
     scene.add(fill);
 
@@ -178,6 +180,7 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
         /* ignore */
       }
       host.classList.add("is-grabbing");
+      onInteractRef.current?.();
     };
 
     const onMove = (e) => {
@@ -232,7 +235,7 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
         f.scale.set(1.05, 2.9, 1.05);
       });
       glows.forEach((g) => {
-        g.material.opacity = 0.85;
+        g.material.opacity = 0.36;
       });
       smokes.forEach((s) => {
         s.material.opacity = 0;
@@ -271,13 +274,13 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
           fl.scale.set(1.05 * (1 - k), 2.9 * (1 - k), 1.05 * (1 - k));
         });
         glows.forEach((g) => {
-          g.material.opacity = 0.85 * (1 - k);
+          g.material.opacity = 0.36 * (1 - k);
         });
         smokes.forEach((s, i) => {
           s.position.y = s.baseY + p * 0.25 + Math.sin(p * 0.9 + i) * 0.05;
           s.position.x = s.baseX + Math.sin(p * 0.7 + i * 1.7) * 0.06;
           s.material.opacity =
-            0.3 * Math.min(1, p / 0.6) * Math.max(0, 1 - Math.max(0, p - 1.4) / 2.4);
+            0.38 * Math.min(1, p / 0.6) * Math.max(0, 1 - Math.max(0, p - 1.4) / 2.4);
         });
         lights.forEach((l) => {
           l.light.intensity = l.base * Math.max(0, 1 - k);
@@ -299,9 +302,9 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
           });
           heart.position.y = TOP + 0.78 + Math.sin(t * 0.9) * 0.03;
           heartGlow.position.y = heart.position.y;
-          heartGlow.material.opacity = 0.42 + 0.1 * Math.sin(t * 1.6);
+          heartGlow.material.opacity = 0.28 + 0.08 * Math.sin(t * 1.6);
           sparks.rotation.y = t * 0.07;
-          sparkMat.opacity = 0.55 + 0.22 * Math.sin(t * 1.25);
+          sparkMat.opacity = 0.36 + 0.14 * Math.sin(t * 1.25);
         }
       }
 
@@ -375,8 +378,15 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
   return (
     <div className="cake-stage" ref={hostRef} aria-label="Gâteau d'anniversaire en 3D, à faire tourner">
       {failed && (
-        <div className="cake-fallback" role="img" aria-label="Gâteau">
-          🎂
+        <div className="cake-fallback" role="img" aria-label="Gâteau d'anniversaire">
+          <svg viewBox="0 0 64 64" width="108" height="108" aria-hidden="true">
+            <rect x="12" y="34" width="40" height="16" rx="4" fill="#f5c2d1" stroke="#b84b70" strokeWidth="2" />
+            <rect x="18" y="22" width="28" height="12" rx="3" fill="#fff9f7" stroke="#b84b70" strokeWidth="2" />
+            <path d="M26 22v-7M32 22v-7M38 22v-7" stroke="#b84b70" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="26" cy="12" r="2" fill="#c9185b" />
+            <circle cx="32" cy="12" r="2" fill="#c9185b" />
+            <circle cx="38" cy="12" r="2" fill="#c9185b" />
+          </svg>
         </div>
       )}
     </div>
