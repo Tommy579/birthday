@@ -3,11 +3,11 @@ import { AnimatePresence } from "motion/react";
 import CakeScene from "./scene/CakeScene.jsx";
 import Confetti from "./components/Confetti.jsx";
 import Progress from "./components/Progress.jsx";
-import { Hero, Message, Photos, Aside, Wish } from "./slides.jsx";
+import { Hero, Message, Photos, Aside, Wish, Done } from "./slides.jsx";
 import { BIRTHDAY, COPY, PHOTOS } from "./content.js";
 
 /* La page « Nous » n'apparaît que si des photos sont déclarées. */
-const SLIDES = ["hero", "message", ...(PHOTOS.length ? ["photos"] : []), "wish", "aside"];
+const SLIDES = ["hero", "message", ...(PHOTOS.length ? ["photos"] : []), "wish", "aside", "done"];
 
 export default function App() {
   const [index, setIndex] = useState(() => {
@@ -20,7 +20,7 @@ export default function App() {
   const [interacted, setInteracted] = useState(false);
 
   const slide = SLIDES[index] ?? "hero";
-  const interactive = slide === "hero" || slide === "wish";
+  const interactive = slide === "hero" || slide === "wish" || slide === "done";
   const isLast = index === SLIDES.length - 1;
 
   /* chaque page a son ancre et son titre */
@@ -56,9 +56,19 @@ export default function App() {
   const blow = useCallback(() => {
     setBlown(true);
     setFlash(true);
-    window.setTimeout(() => setFlash(false), 320);
     if (navigator.vibrate) navigator.vibrate([18, 60, 26]);
   }, []);
+
+  useEffect(() => {
+    if (!flash) return;
+    const timer = window.setTimeout(() => setFlash(false), 320);
+    return () => window.clearTimeout(timer);
+  }, [flash]);
+
+  useEffect(() => {
+    if (slide === "done") blow();
+    else setBlown(false);
+  }, [slide, blow]);
 
   const restart = useCallback(() => {
     setBlown(false);
@@ -66,10 +76,9 @@ export default function App() {
   }, []);
 
   const onPrimary = useCallback(() => {
-    if (slide === "wish" && !blown) blow();
-    else if (isLast) restart();
+    if (isLast) restart();
     else next();
-  }, [slide, blown, isLast, blow, restart, next]);
+  }, [isLast, restart, next]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -89,16 +98,17 @@ export default function App() {
   }, [next, prev]);
 
   const label =
-    slide === "wish" && !blown
+    slide === "wish" || slide === "aside"
       ? COPY.wish.cta
       : isLast
         ? COPY.wish.again
         : COPY.next;
 
   const isAside = slide === "aside";
+  const isDone = slide === "done";
 
   return (
-    <main className={`app ${flash ? "is-flashing" : ""} ${isAside ? "is-aside" : ""}`}>
+    <main className={`app ${flash ? "is-flashing" : ""} ${isAside ? "is-aside" : ""} ${isDone ? "is-done" : ""}`}>
       <div className="bg" aria-hidden="true" />
 
       <div className={`stage ${interactive ? "is-interactive" : ""}`}>
@@ -123,8 +133,9 @@ export default function App() {
             {slide === "hero" && <Hero key="hero" interacted={interacted} />}
             {slide === "message" && <Message key="message" />}
             {slide === "photos" && <Photos key="photos" photos={PHOTOS} />}
+            {slide === "wish" && <Wish key="wish" />}
             {slide === "aside" && <Aside key="aside" />}
-            {slide === "wish" && <Wish key="wish" blown={blown} />}
+            {slide === "done" && <Done key="done" />}
           </AnimatePresence>
         </div>
 

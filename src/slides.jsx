@@ -1,4 +1,4 @@
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import Reveal from "./components/Reveal.jsx";
 import Hearts from "./components/Hearts.jsx";
 import PhotoStrip from "./components/PhotoStrip.jsx";
@@ -102,47 +102,35 @@ export function Aside() {
     <Slide>
       <div className="aside-wrap">
         <h1 className="aside-text">{COPY.aside.text}</h1>
-        <div className="aside-notes">
-          <p>{COPY.aside.note1}</p>
-          <p>{COPY.aside.note2}</p>
-        </div>
       </div>
     </Slide>
   );
 }
 
-export function Wish({ blown }) {
-  const reduce = useReducedMotion();
-  const t = reduce ? { duration: 0 } : { duration: 0.5, ease: EASE };
-
+export function Wish() {
   return (
     <Slide>
-      <AnimatePresence mode="wait" initial={false}>
-        {!blown ? (
-          <motion.div
-            key="wish"
-            className="wish"
-            initial={reduce ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={t}
-          >
-            <h1 className="title">{COPY.wish.title}</h1>
-            <p className="subtitle">{COPY.wish.subtitle}</p>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="done"
-            className="wish"
-            initial={reduce ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={t}
-          >
-            <h1 className="title done">{COPY.wish.done}</h1>
-            <p className="signature">{BIRTHDAY.signature}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="wish">
+        <h1 className="title">{COPY.wish.title}</h1>
+        <p className="subtitle">{COPY.wish.subtitle}</p>
+      </div>
+    </Slide>
+  );
+}
+
+export function Done() {
+  return (
+    <Slide>
+      <div className="done-wrap">
+        <div className="wish">
+          <h1 className="title done">{COPY.wish.done}</h1>
+          <p className="signature">{BIRTHDAY.signature}</p>
+        </div>
+        <div className="done-notes">
+          <p>{COPY.wish.note1}</p>
+          <p>{COPY.wish.note2}</p>
+        </div>
+      </div>
     </Slide>
   );
 }

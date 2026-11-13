@@ -331,15 +331,14 @@ body {
 /* ── aparté sans serif centré ─────────────────────────────── */
 .aside-wrap {
   flex: 1 1 auto;
-  display: grid;
-  grid-template-rows: 1fr auto 1fr;
-  justify-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   padding: 0 12px;
 }
 
 .aside-text {
-  grid-row: 2;
   margin: 0;
   max-width: 34ch;
   font-family: var(--font-sans);
@@ -351,9 +350,16 @@ body {
   color: var(--ink);
 }
 
-.aside-notes {
-  grid-row: 3;
-  align-self: end;
+.done-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.done-notes {
   padding-bottom: 18px;
   display: flex;
   flex-direction: column;
@@ -366,7 +372,7 @@ body {
   color: var(--muted);
 }
 
-.aside-notes p {
+.done-notes p {
   margin: 0;
 }
 
@@ -647,6 +653,27 @@ body {
   .app.is-aside .content {
     grid-column: 1 / -1;
     align-self: stretch;
+  }
+
+  .app.is-done .content {
+    align-self: stretch;
+  }
+
+  .done-wrap {
+    display: grid;
+    grid-template-rows: 1fr auto 1fr;
+    justify-items: start;
+  }
+
+  .done-wrap .wish {
+    grid-row: 2;
+  }
+
+  .done-notes {
+    grid-row: 3;
+    align-self: end;
+    align-items: flex-start;
+    text-align: left;
   }
 
   .app.is-aside .slide {

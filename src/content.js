@@ -37,6 +37,8 @@ export const COPY = {
     done: "Vœu exaucé.",
     cta: "Souffler les bougies",
     again: "Revoir",
+    note1: "(j'espère que c'était moi ton vœu)",
+    note2: "(je t'aime ❤️)",
   },
   photos: {
     title: "Nous.",
@@ -44,15 +46,14 @@ export const COPY = {
   },
   aside: {
     text: "nan mais vraiment souffle les bougies premier degré tu vas voir y'a un ptit truc et tout",
-    note1: "(j'espère que c'était moi ton vœu)",
-    note2: "(je t'aime ❤️)",
   },
   nav: {
     hero: "Gâteau",
     message: "Message",
     photos: "Nous",
-    aside: "Note",
     wish: "Vœu",
+    aside: "Note",
+    done: "Vœu exaucé",
   },
   back: "Retour",
   next: "Continuer",
@@ -74,6 +75,7 @@ export const FRAMES = {
   photos: { top: 0.65, size: 0.21, pitch: 0.42, spin: 0.04, expo: 0.76 },
   aside: { top: 0.32, size: 0.34, pitch: 0.22, spin: 0.09, expo: 0.88 },
   wish: { top: 0.32, size: 0.34, pitch: 0.22, spin: 0.09, expo: 0.88 },
+  done: { top: 0.32, size: 0.34, pitch: 0.22, spin: 0.09, expo: 0.88 },
 };
 
 /* Grand écran : deux colonnes. Le texte tient la gauche, le
@@ -85,6 +87,7 @@ export const FRAMES_WIDE = {
   photos: { top: 0.18, size: 0.58, pitch: 0.42, spin: 0.04, expo: 0.8, x: 0.2 },
   aside: { top: 0.2, size: 0.54, pitch: 0.26, spin: 0.09, expo: 0.9, x: 0.2 },
   wish: { top: 0.2, size: 0.54, pitch: 0.26, spin: 0.09, expo: 0.9, x: 0.2 },
+  done: { top: 0.2, size: 0.54, pitch: 0.26, spin: 0.09, expo: 0.9, x: 0.2 },
 };
 
 /* À partir de cette largeur, on passe en deux colonnes. */
