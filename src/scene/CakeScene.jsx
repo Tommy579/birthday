@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { animate, inertia, motionValue } from "motion";
+import { animate, motionValue } from "motion";
 import { buildCake, TOP } from "./buildCake.js";
 import { CAKE_TOP, FRAMES, FRAMES_WIDE, WIDE_MIN } from "../content.js";
 
@@ -175,26 +175,25 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
     let lastY = 0;
     let lastMoveTime = 0;
     let velY = 0;
+    let coastVel = 0;
+    let spinPause = 0;
 
-    const INERTIA_POWER = 0.72;
+    /* Frottement réaliste de plateau tournant (inertie forte + arrêt net) */
+    const FRICTION_VISCOUS = 0.85;
+    const FRICTION_DRY = 4.2;
 
     const releasePhysics = () => {
       const sinceLastMove = performance.now() - lastMoveTime;
-      const stale = sinceLastMove > 120;
-      const decay = stale ? 0 : Math.exp(-sinceLastMove / 90);
-      const releaseVelY = THREE.MathUtils.clamp(velY * decay, -18, 18);
+      const stale = sinceLastMove > 110;
+      const decay = stale ? 0 : Math.exp(-sinceLastMove / 95);
+      const releaseVelY = THREE.MathUtils.clamp(velY * decay, -20, 20);
       velY = 0;
 
-      if (!reduce && Math.abs(releaseVelY) > 0.08) {
-        const current = rotY.get();
-        animate(rotY, current + releaseVelY * INERTIA_POWER, {
-          type: inertia,
-          velocity: releaseVelY,
-          power: INERTIA_POWER,
-          timeConstant: 520,
-          restDelta: 0.0005,
-          restSpeed: 0.005,
-        });
+      if (!reduce && Math.abs(releaseVelY) > 0.15) {
+        coastVel = releaseVelY;
+        spinPause = 0.65;
+      } else {
+        coastVel = 0;
       }
 
       if (reduce) {
@@ -202,9 +201,9 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
       } else {
         animate(pitchOffset, 0, {
           type: "spring",
-          stiffness: 170,
+          stiffness: 145,
           damping: 24,
-          mass: 0.85,
+          mass: 1.3,
           restDelta: 0.0005,
           restSpeed: 0.005,
         });
@@ -219,7 +218,8 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
       lastY = e.clientY;
       lastMoveTime = performance.now();
       velY = 0;
-      rotY.stop();
+      coastVel = 0;
+      spinPause = 0.65;
       pitchOffset.stop();
       try {
         el.setPointerCapture(e.pointerId);
@@ -241,17 +241,17 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
       lastY = e.clientY;
       lastMoveTime = now;
 
-      const sensY = (Math.PI * 1.65) / Math.max(320, Math.min(w, 720));
+      const sensY = (Math.PI * 1.45) / Math.max(340, Math.min(w, 740));
       const deltaY = dx * sensY;
       rotY.set(rotY.get() + deltaY);
 
       if (dx !== 0) {
         const instVelY = (deltaY / dtMs) * 1000;
-        velY = dtMs > 70 ? instVelY : velY * 0.4 + instVelY * 0.6;
+        velY = dtMs > 75 ? instVelY : velY * 0.55 + instVelY * 0.45;
       }
 
       const curP = pitchOffset.get();
-      const stepP = dy * 0.0022;
+      const stepP = dy * 0.002;
       const limit = stepP > 0 ? 0.22 : 0.14;
       const over = Math.max(0, Math.abs(curP) - limit * 0.65);
       const damp = 1 / (1 + over * 6);
@@ -323,15 +323,37 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
 
       updateCamera(dt);
 
-      const coasting = dragging || Math.abs(rotY.getVelocity()) > 0.18;
+      if (!dragging && coastVel !== 0) {
+        const sign = Math.sign(coastVel);
+        const mag = Math.abs(coastVel);
+        const ratio = FRICTION_DRY / FRICTION_VISCOUS;
+        const e = Math.exp(-FRICTION_VISCOUS * dt);
+        const nextMag = mag * e - ratio * (1 - e);
+        if (nextMag <= 0) {
+          const tz = Math.log(1 + (FRICTION_VISCOUS * mag) / FRICTION_DRY) / FRICTION_VISCOUS;
+          const ez = Math.exp(-FRICTION_VISCOUS * tz);
+          const dx = ((mag + ratio) / FRICTION_VISCOUS) * (1 - ez) - ratio * tz;
+          rotY.set(rotY.get() + sign * Math.max(0, dx));
+          coastVel = 0;
+        } else {
+          const dx = ((mag + ratio) / FRICTION_VISCOUS) * (1 - e) - ratio * dt;
+          rotY.set(rotY.get() + sign * dx);
+          coastVel = sign * nextMag;
+        }
+        spinPause = 0.65;
+      } else if (!dragging && spinPause > 0) {
+        spinPause = Math.max(0, spinPause - dt);
+      }
+
+      const coasting = dragging || coastVel !== 0 || spinPause > 0;
       const goalSpin = coasting ? 0 : targetSpin;
-      const spinBlend = 1 - Math.exp(-dt * (coasting ? 8 : 1.8));
+      const spinBlend = 1 - Math.exp(-dt * (coasting ? 10 : 1.2));
       spinRate += (goalSpin - spinRate) * spinBlend;
       idleSpinAngle += spinRate * dt;
 
       cake.rotation.y = rotY.get() + idleSpinAngle;
       cake.rotation.x = 0;
-      cake.position.y = reduce ? 0 : Math.sin(t * 0.8) * 0.015;
+      cake.position.y = 0;
 
       if (blownRef.current) {
         if (!blownAt) blownAt = t;
