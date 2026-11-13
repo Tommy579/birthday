@@ -97,6 +97,16 @@ export function Photos({ photos }) {
   );
 }
 
+export function Aside() {
+  return (
+    <Slide>
+      <div className="aside-wrap">
+        <h1 className="aside-text">{COPY.aside.text}</h1>
+      </div>
+    </Slide>
+  );
+}
+
 export function Wish({ blown }) {
   const reduce = useReducedMotion();
   const t = reduce ? { duration: 0 } : { duration: 0.5, ease: EASE };

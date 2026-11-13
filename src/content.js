@@ -42,10 +42,14 @@ export const COPY = {
     title: "Nous.",
     subtitle: "Quelques moments passés ensemble, en attendant tous les prochains 🥰",
   },
+  aside: {
+    text: "nan mais vraiment souffle les bougies premier degré tu vas voir y'a un ptit truc et tout",
+  },
   nav: {
     hero: "Gâteau",
     message: "Message",
     photos: "Nous",
+    aside: "Note",
     wish: "Vœu",
   },
   back: "Retour",
@@ -65,8 +69,9 @@ export const PHOTOS = PICS;
 export const FRAMES = {
   hero: { top: 0.35, size: 0.34, pitch: 0.28, spin: 0.14, expo: 0.85 },
   message: { top: 0.41, size: 0.32, pitch: 0.4, spin: 0.05, expo: 0.78 },
-  wish: { top: 0.32, size: 0.34, pitch: 0.22, spin: 0.09, expo: 0.88 },
   photos: { top: 0.65, size: 0.21, pitch: 0.42, spin: 0.04, expo: 0.76 },
+  aside: { top: 0.32, size: 0.34, pitch: 0.22, spin: 0.09, expo: 0.88 },
+  wish: { top: 0.32, size: 0.34, pitch: 0.22, spin: 0.09, expo: 0.88 },
 };
 
 /* Grand écran : deux colonnes. Le texte tient la gauche, le
@@ -75,8 +80,9 @@ export const FRAMES = {
 export const FRAMES_WIDE = {
   hero: { top: 0.2, size: 0.6, pitch: 0.3, spin: 0.14, expo: 0.86, x: 0.2 },
   message: { top: 0.24, size: 0.54, pitch: 0.42, spin: 0.05, expo: 0.8, x: 0.2 },
-  wish: { top: 0.2, size: 0.54, pitch: 0.26, spin: 0.09, expo: 0.9, x: 0.2 },
   photos: { top: 0.18, size: 0.58, pitch: 0.42, spin: 0.04, expo: 0.8, x: 0.2 },
+  aside: { top: 0.2, size: 0.54, pitch: 0.26, spin: 0.09, expo: 0.9, x: 0.2 },
+  wish: { top: 0.2, size: 0.54, pitch: 0.26, spin: 0.09, expo: 0.9, x: 0.2 },
 };
 
 /* À partir de cette largeur, on passe en deux colonnes. */

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { animate, motionValue } from "motion";
 import { buildCake, TOP } from "./buildCake.js";
 import { CAKE_TOP, FRAMES, FRAMES_WIDE, WIDE_MIN } from "../content.js";
 
@@ -103,9 +104,9 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
 
     /* ── rig caméra ─────────────────────────────────────── */
     const rigTarget = new THREE.Vector3(0, 1.2, 0);
-    const rigCam = new THREE.Vector3(0, 2.6, 11);
     const goal = new THREE.Vector3();
-    const goalCam = new THREE.Vector3();
+    let rigDist = 11;
+    let rigPitch = 0.28;
     let w = 1;
     let h = 1;
     let first = true;
@@ -131,6 +132,12 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
       first = true;
     }
 
+    /* ── rotation physique (Motion inertia + spring) ─────── */
+    const rotY = motionValue(0);
+    const pitchOffset = motionValue(0);
+    let idleSpinAngle = 0;
+    let spinRate = 0;
+
     function updateCamera(dt) {
       const { f } = currentFrame();
       const size = f.size;
@@ -140,15 +147,18 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
       const targetY = CAKE_TOP + (f.top - 0.5) * viewH;
       const targetX = -(f.x || 0) * viewW;
       goal.set(targetX, targetY, 0);
-      goalCam.set(
-        targetX,
-        targetY + Math.sin(f.pitch) * dist,
-        Math.cos(f.pitch) * dist
-      );
+
       const k = first ? 1 : 1 - Math.exp(-dt * 4.2);
       rigTarget.lerp(goal, k);
-      rigCam.lerp(goalCam, k);
-      camera.position.copy(rigCam);
+      rigDist += (dist - rigDist) * k;
+      rigPitch += (f.pitch - rigPitch) * k;
+
+      const pitch = THREE.MathUtils.clamp(rigPitch + pitchOffset.get(), 0.06, 0.72);
+      camera.position.set(
+        rigTarget.x,
+        rigTarget.y + Math.sin(pitch) * rigDist,
+        rigTarget.z + Math.cos(pitch) * rigDist
+      );
       camera.lookAt(rigTarget);
       first = false;
     }
@@ -163,8 +173,38 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
     let pointerId = null;
     let lastX = 0;
     let lastY = 0;
+    let lastMoveTime = 0;
     let velY = 0;
-    let velX = 0;
+
+    const releasePhysics = () => {
+      const stale = performance.now() - lastMoveTime > 85;
+      const releaseVelY = stale ? 0 : THREE.MathUtils.clamp(velY, -12, 12);
+      velY = 0;
+
+      if (!reduce && Math.abs(releaseVelY) > 0.12) {
+        animate(rotY, rotY.get(), {
+          type: "inertia",
+          velocity: releaseVelY,
+          power: 0.46,
+          timeConstant: 420,
+          restDelta: 0.0005,
+          restSpeed: 0.005,
+        });
+      }
+
+      if (reduce) {
+        pitchOffset.set(0);
+      } else {
+        animate(pitchOffset, 0, {
+          type: "spring",
+          stiffness: 170,
+          damping: 24,
+          mass: 0.85,
+          restDelta: 0.0005,
+          restSpeed: 0.005,
+        });
+      }
+    };
 
     const onDown = (e) => {
       if (!interactiveRef.current || !e.isPrimary) return;
@@ -172,8 +212,10 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
       pointerId = e.pointerId;
       lastX = e.clientX;
       lastY = e.clientY;
+      lastMoveTime = performance.now();
       velY = 0;
-      velX = 0;
+      rotY.stop();
+      pitchOffset.stop();
       try {
         el.setPointerCapture(e.pointerId);
       } catch {
@@ -185,14 +227,27 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
 
     const onMove = (e) => {
       if (!dragging || e.pointerId !== pointerId) return;
+      const now = performance.now();
+      const dtMs = Math.max(4, now - lastMoveTime);
       const dx = e.clientX - lastX;
       const dy = e.clientY - lastY;
       lastX = e.clientX;
       lastY = e.clientY;
-      velY = dx * 0.0092;
-      velX = dy * 0.0035;
-      cake.rotation.y += velY;
-      cake.rotation.x = THREE.MathUtils.clamp(cake.rotation.x + velX, -0.22, 0.3);
+      lastMoveTime = now;
+
+      const sensY = (Math.PI * 1.45) / Math.max(320, Math.min(w, 720));
+      const deltaY = dx * sensY;
+      rotY.set(rotY.get() + deltaY);
+
+      const instVelY = (deltaY / dtMs) * 1000;
+      velY = dtMs > 60 ? instVelY : velY * 0.45 + instVelY * 0.55;
+
+      const curP = pitchOffset.get();
+      const stepP = dy * 0.0022;
+      const limit = stepP > 0 ? 0.22 : 0.14;
+      const over = Math.max(0, Math.abs(curP) - limit * 0.65);
+      const damp = 1 / (1 + over * 6);
+      pitchOffset.set(THREE.MathUtils.clamp(curP + stepP * damp, -0.16, 0.24));
     };
 
     const onUp = (e) => {
@@ -207,12 +262,15 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
           /* ignore */
         }
       }
+      releasePhysics();
     };
 
     const stopDrag = () => {
+      if (!dragging) return;
       dragging = false;
       pointerId = null;
       host.classList.remove("is-grabbing");
+      releasePhysics();
     };
 
     const onContext = (e) => e.preventDefault();
@@ -247,59 +305,65 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
     }
 
     /* ── boucle ─────────────────────────────────────────── */
-    function animate() {
-      raf = requestAnimationFrame(animate);
+    function animateFrame() {
+      raf = requestAnimationFrame(animateFrame);
       timer.update();
       const dt = Math.min(timer.getDelta(), 0.05);
       const t = timer.getElapsed();
       const { f } = currentFrame();
-      const spin = reduce ? 0 : f.spin;
+      const targetSpin = reduce ? 0 : f.spin;
 
       updateCamera(dt);
 
-      if (!dragging) {
-        velY *= 0.935;
-        velX *= 0.9;
-        cake.rotation.y += velY + spin * dt;
-        cake.rotation.x += (0 - cake.rotation.x) * Math.min(1, dt * 2.2);
-      }
+      const coasting = dragging || Math.abs(rotY.getVelocity()) > 0.18;
+      const goalSpin = coasting ? 0 : targetSpin;
+      const spinBlend = 1 - Math.exp(-dt * (coasting ? 8 : 1.8));
+      spinRate += (goalSpin - spinRate) * spinBlend;
+      idleSpinAngle += spinRate * dt;
+
+      cake.rotation.y = rotY.get() + idleSpinAngle;
+      cake.rotation.x = 0;
       cake.position.y = reduce ? 0 : Math.sin(t * 0.8) * 0.015;
 
       if (blownRef.current) {
         if (!blownAt) blownAt = t;
         const p = Math.max(0, t - blownAt);
         const k = Math.min(1, p / 0.45);
-        flames.forEach((fl) => {
+        for (let i = 0; i < flames.length; i++) {
+          const fl = flames[i];
           fl.visible = k < 1;
           fl.scale.set(1.05 * (1 - k), 2.9 * (1 - k), 1.05 * (1 - k));
-        });
-        glows.forEach((g) => {
-          g.material.opacity = 0.36 * (1 - k);
-        });
-        smokes.forEach((s, i) => {
+        }
+        for (let i = 0; i < glows.length; i++) {
+          glows[i].material.opacity = 0.36 * (1 - k);
+        }
+        for (let i = 0; i < smokes.length; i++) {
+          const s = smokes[i];
           s.position.y = s.baseY + p * 0.25 + Math.sin(p * 0.9 + i) * 0.05;
           s.position.x = s.baseX + Math.sin(p * 0.7 + i * 1.7) * 0.06;
           s.material.opacity =
             0.38 * Math.min(1, p / 0.6) * Math.max(0, 1 - Math.max(0, p - 1.4) / 2.4);
-        });
-        lights.forEach((l) => {
+        }
+        for (let i = 0; i < lights.length; i++) {
+          const l = lights[i];
           l.light.intensity = l.base * Math.max(0, 1 - k);
-        });
+        }
       } else {
         if (blownAt) {
           blownAt = 0;
           resetBlow();
         }
         if (!reduce) {
-          flames.forEach((fl, i) => {
+          for (let i = 0; i < flames.length; i++) {
             const s = 0.94 + 0.12 * Math.sin(t * 11 + i * 2.1) + 0.06 * Math.sin(t * 23 + i);
-            fl.scale.set(1.05, 2.9 * s, 1.05);
-          });
-          lights.forEach((l) => {
+            flames[i].scale.set(1.05, 2.9 * s, 1.05);
+          }
+          for (let i = 0; i < lights.length; i++) {
+            const l = lights[i];
             l.light.intensity =
               l.base *
               (0.86 + 0.14 * Math.sin(t * 8.5 + l.seed) + 0.05 * Math.sin(t * 19 + l.seed * 3));
-          });
+          }
           heart.position.y = TOP + 0.78 + Math.sin(t * 0.9) * 0.03;
           heartGlow.position.y = heart.position.y;
           heartGlow.material.opacity = 0.28 + 0.08 * Math.sin(t * 1.6);
@@ -320,7 +384,7 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
       if (raf) return;
       timer.update();
       timer.getDelta();
-      animate();
+      animateFrame();
     }
     function stop() {
       if (raf) cancelAnimationFrame(raf);
@@ -347,6 +411,10 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
     return () => {
       disposed = true;
       stop();
+      rotY.stop();
+      pitchOffset.stop();
+      rotY.destroy();
+      pitchOffset.destroy();
       io.disconnect();
       ro.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);

@@ -3,11 +3,11 @@ import { AnimatePresence } from "motion/react";
 import CakeScene from "./scene/CakeScene.jsx";
 import Confetti from "./components/Confetti.jsx";
 import Progress from "./components/Progress.jsx";
-import { Hero, Message, Photos, Wish } from "./slides.jsx";
+import { Hero, Message, Photos, Aside, Wish } from "./slides.jsx";
 import { BIRTHDAY, COPY, PHOTOS } from "./content.js";
 
 /* La page « Nous » n'apparaît que si des photos sont déclarées. */
-const SLIDES = ["hero", "message", ...(PHOTOS.length ? ["photos"] : []), "wish"];
+const SLIDES = ["hero", "message", ...(PHOTOS.length ? ["photos"] : []), "aside", "wish"];
 
 export default function App() {
   const [index, setIndex] = useState(() => {
@@ -90,8 +90,10 @@ export default function App() {
   const label =
     slide === "wish" ? (blown ? COPY.wish.again : COPY.wish.cta) : COPY.next;
 
+  const isAside = slide === "aside";
+
   return (
-    <main className={`app ${flash ? "is-flashing" : ""}`}>
+    <main className={`app ${flash ? "is-flashing" : ""} ${isAside ? "is-aside" : ""}`}>
       <div className="bg" aria-hidden="true" />
 
       <div className={`stage ${interactive ? "is-interactive" : ""}`}>
@@ -116,6 +118,7 @@ export default function App() {
             {slide === "hero" && <Hero key="hero" interacted={interacted} />}
             {slide === "message" && <Message key="message" />}
             {slide === "photos" && <Photos key="photos" photos={PHOTOS} />}
+            {slide === "aside" && <Aside key="aside" />}
             {slide === "wish" && <Wish key="wish" blown={blown} />}
           </AnimatePresence>
         </div>
