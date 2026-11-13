@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { animate, motionValue } from "motion";
+import { animate, inertia, motionValue } from "motion";
 import { buildCake, TOP } from "./buildCake.js";
 import { CAKE_TOP, FRAMES, FRAMES_WIDE, WIDE_MIN } from "../content.js";
 
@@ -176,17 +176,22 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
     let lastMoveTime = 0;
     let velY = 0;
 
+    const INERTIA_POWER = 0.72;
+
     const releasePhysics = () => {
-      const stale = performance.now() - lastMoveTime > 85;
-      const releaseVelY = stale ? 0 : THREE.MathUtils.clamp(velY, -12, 12);
+      const sinceLastMove = performance.now() - lastMoveTime;
+      const stale = sinceLastMove > 120;
+      const decay = stale ? 0 : Math.exp(-sinceLastMove / 90);
+      const releaseVelY = THREE.MathUtils.clamp(velY * decay, -18, 18);
       velY = 0;
 
-      if (!reduce && Math.abs(releaseVelY) > 0.12) {
-        animate(rotY, rotY.get(), {
-          type: "inertia",
+      if (!reduce && Math.abs(releaseVelY) > 0.08) {
+        const current = rotY.get();
+        animate(rotY, current + releaseVelY * INERTIA_POWER, {
+          type: inertia,
           velocity: releaseVelY,
-          power: 0.46,
-          timeConstant: 420,
+          power: INERTIA_POWER,
+          timeConstant: 520,
           restDelta: 0.0005,
           restSpeed: 0.005,
         });
@@ -231,16 +236,19 @@ export default function CakeScene({ frame = "hero", interactive = false, blown =
       const dtMs = Math.max(4, now - lastMoveTime);
       const dx = e.clientX - lastX;
       const dy = e.clientY - lastY;
+      if (dx === 0 && dy === 0) return;
       lastX = e.clientX;
       lastY = e.clientY;
       lastMoveTime = now;
 
-      const sensY = (Math.PI * 1.45) / Math.max(320, Math.min(w, 720));
+      const sensY = (Math.PI * 1.65) / Math.max(320, Math.min(w, 720));
       const deltaY = dx * sensY;
       rotY.set(rotY.get() + deltaY);
 
-      const instVelY = (deltaY / dtMs) * 1000;
-      velY = dtMs > 60 ? instVelY : velY * 0.45 + instVelY * 0.55;
+      if (dx !== 0) {
+        const instVelY = (deltaY / dtMs) * 1000;
+        velY = dtMs > 70 ? instVelY : velY * 0.4 + instVelY * 0.6;
+      }
 
       const curP = pitchOffset.get();
       const stepP = dy * 0.0022;

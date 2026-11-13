@@ -7,7 +7,7 @@ import { Hero, Message, Photos, Aside, Wish } from "./slides.jsx";
 import { BIRTHDAY, COPY, PHOTOS } from "./content.js";
 
 /* La page « Nous » n'apparaît que si des photos sont déclarées. */
-const SLIDES = ["hero", "message", ...(PHOTOS.length ? ["photos"] : []), "aside", "wish"];
+const SLIDES = ["hero", "message", ...(PHOTOS.length ? ["photos"] : []), "wish", "aside"];
 
 export default function App() {
   const [index, setIndex] = useState(() => {
@@ -21,6 +21,7 @@ export default function App() {
 
   const slide = SLIDES[index] ?? "hero";
   const interactive = slide === "hero" || slide === "wish";
+  const isLast = index === SLIDES.length - 1;
 
   /* chaque page a son ancre et son titre */
   useEffect(() => {
@@ -65,10 +66,10 @@ export default function App() {
   }, []);
 
   const onPrimary = useCallback(() => {
-    if (slide !== "wish") next();
-    else if (!blown) blow();
-    else restart();
-  }, [slide, blown, next, blow, restart]);
+    if (slide === "wish" && !blown) blow();
+    else if (isLast) restart();
+    else next();
+  }, [slide, blown, isLast, blow, restart, next]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -88,7 +89,11 @@ export default function App() {
   }, [next, prev]);
 
   const label =
-    slide === "wish" ? (blown ? COPY.wish.again : COPY.wish.cta) : COPY.next;
+    slide === "wish" && !blown
+      ? COPY.wish.cta
+      : isLast
+        ? COPY.wish.again
+        : COPY.next;
 
   const isAside = slide === "aside";
 

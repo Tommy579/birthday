@@ -44,6 +44,8 @@ export const COPY = {
   },
   aside: {
     text: "nan mais vraiment souffle les bougies premier degré tu vas voir y'a un ptit truc et tout",
+    note1: "(j'espère que c'était moi ton vœu)",
+    note2: "(je t'aime ❤️)",
   },
   nav: {
     hero: "Gâteau",

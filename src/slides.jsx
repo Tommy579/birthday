@@ -102,6 +102,10 @@ export function Aside() {
     <Slide>
       <div className="aside-wrap">
         <h1 className="aside-text">{COPY.aside.text}</h1>
+        <div className="aside-notes">
+          <p>{COPY.aside.note1}</p>
+          <p>{COPY.aside.note2}</p>
+        </div>
       </div>
     </Slide>
   );
